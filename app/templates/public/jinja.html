@@ -1,0 +1,179 @@
+{% extends 'public/templates/public_templates.html' %}
+{% import "macros/input_macro.html" as im %}
+
+{% block title%}Jinja {% endblock %}
+
+{% block main %}
+<div class="container">
+    <h1>Jinja Templates</h1>
+    <hr>
+    <div class="row">
+
+        <div class="col-md-4">
+            <h4>Accessing variables in flask </h4>
+            <br />
+            <p>my name is {{my_name}}</p>
+            <br />
+        </div>
+        <div class="col-md-4">
+
+            <h4>Accessing variables in flask </h4>
+            <br />
+            <p>my name is {{my_name}}</p>
+            <br />
+            <p>Looping</p>
+            <ul>
+                {% for lang in langs %}
+                <li>{{lang}}</li>
+
+                {% endfor %}
+            </ul>
+
+
+        </div>
+        <div class="col-md-4">
+            <h4>Looping with index</h4>
+            <ul>
+                {% for lang in langs %}
+                <li>{{loop.index}}:{{lang}}</li>
+
+                {% endfor %}
+
+            </ul>
+
+
+        </div>
+
+        <div class="col-md-4">
+            <h4>Looping through a dictionary</h4>
+            <ul>
+                {% for key,value in diction.items() %}
+                <li>{{key}} : {{value}}</li>
+
+                {% endfor %}
+
+            </ul>
+        </div>
+
+        <div class="col-md-4">
+            <h4>Looping through dict keys </h4>
+            <ul>
+                {% for key in diction.keys() %}
+                <li>{{key}}</li>
+
+                {% endfor %}
+
+            </ul>
+        </div>
+
+        <div class="col-md-4">
+            <h4> Accessing through index </h4>
+            {{langs[1]}}
+        </div>
+
+        <div class="col-md-4">
+            <h4>Looping through dict keys </h4>
+            <ul>
+                {% for key in diction.keys() %}
+                <li>{{key}}</li>
+
+                {% endfor %}
+
+            </ul>
+        </div>
+
+        <div class="col-md-4">
+            <h4> Accessing dictionary member </h4>
+            {{ diction["Music"]}}
+        </div>
+
+        <div class="col-md-4">
+            <h4> Accessing class members </h4>
+            {{ my_git.name}}
+        </div>
+        <div class="col-md-4">
+            <h4> unpacking Tuples </h4>
+            {% set color1,color2,color3 = myTup %}
+            <p>{{color1}}</p>
+            <p>{{color2}}</p>
+            <p>{{color3}}</p>
+        </div>
+        <div class="col-md-4">
+            <h4> Call a function </h4>
+            <p>{{repeat("jinja templating ",20)}}</p>
+        </div>
+
+        <div class="col-md-4">
+            <h4> Call a class method </h4>
+            <p>{{my_git.pull()}}</p>
+            <p>{{my_git.clone()}}</p>
+        </div>
+
+        <div class="col-md-4">
+            <h4> Conditionals </h4>
+            {% if cool %}
+            <p>Joseph you are {{cool}}</p>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <h4> Comparison </h4>
+            {% if age <18 %} <p>No entry</p>
+                {% elif age <26 %} <p>Nearly old enough</p>
+                    {% else %}
+                    <p>You may enter </p>
+                    {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <h4> Math in templates </h4>
+
+            <p>{{age * 6}}</p>
+
+        </div>
+
+        <div class="col-md-4">
+            <h4> Jinja Filters </h4>
+
+            <p>{{langs | length }}</p>
+            <p>{{my_name | reverse }}</p>
+            <p>{{my_name | upper }}</p>
+
+        </div>
+        <div class="col-md-4">
+            <h4> Jinja Filters - join </h4>
+
+            <p>{{langs | join(",") }}</p>
+
+
+        </div>
+        <div class="col-md-4">
+            <h4> Jinja Custom Filters </h4>
+
+            <p>{{date | clean_date}}</p>
+
+
+        </div>
+        <div class="col-md-4">
+            <h4> Jinja Escaping </h4>
+            <p>{{my_html | safe }}</p>
+        </div>
+        <div class="col-md-4">
+            <h4> Jinja Escaping Scripts</h4>
+            <p>{{my_script }}</p>
+            <!-- <p>{{my_script | safe }}</p> -->
+        </div>
+
+        <div class="col-md-4">
+            <!-- its like a function in jinja  -->
+            <h4>MAcros in jinja</h4>
+            
+            {{im.input(label="username",name = "username" ,id="name" , placeholder="Please enter your name")}}
+            {{im.input(label="Age",name = "Age",type="number", id="age" , placeholder="Please enter your age")}}
+            {{im.input(label="Password",type="password",name = "password" ,id="password" , placeholder="Please enter your password")}}
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

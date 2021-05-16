@@ -2,6 +2,10 @@ from app import app
 from flask import render_template,redirect,request,jsonify,make_response
 from datetime import datetime
 
+# Image uploading
+import os
+from werkzeug.utils import secure_filename
+
 
 @app.template_filter("clean_date")
 def clean_date(dt):
@@ -84,30 +88,34 @@ def sign_up():
 # Dynamic urls
 
 users ={
-    "Joseph":{
-        "name":"joseph kithome",
+    "joseph":{
+        
+        "username":"joseph",
         "bio": "i am a fullstack web and mobile developer",
-        "twitter_handle":"@RiserRiser2"
+        "twitter_handle":"@RiserRiser2",
+        "password":"password1"
     },
     "onesmus":{
-        "name":"onesmus kithome",
+        "username":"onesmus ",
         "bio": "i am a government official",
-        "twitter_handle":"@onesones"
+        "twitter_handle":"@onesones",
+        "password":"password2"
     },
     "juliamer":{
-        "name":"juliamer Waaris",
+        "username":"juliamer",
         "bio": "i am a musician",
-        "twitter_handle":"@RiserRiser2"
+        "twitter_handle":"@RiserRiser2",
+        "password":"password3"
     }
 }
-@app.route("/profile/<username>")
-def userProfile(username):
+# @app.route("/profile/<username>")
+# def userProfile(username):
 
-    user = None
+#     user = None
 
-    if username in users:
-        user=users[username]
-    return render_template("public/profile.html",username=username,user=user)           
+#     if username in users:
+#         user=users[username]
+#     return render_template("public/profile.html",username=username,user=user)           
 
  # multiple dynamic urls
 
@@ -171,3 +179,142 @@ def query():
         return f"(Query) {serialized}",200  
     else:
         return "No query received",404    
+
+# uploading images
+def check_image_extension(filename):
+    if not "." in  filename:
+        return False
+
+    else:
+        ext = filename.rsplit(".",1)[1]
+
+    if ext.upper() in app.config["ALLOWED_IMAGE_EXTENSIONS"]:
+        return True
+    return False            
+
+def allowed_filename_size(filesize):
+    if int(filesize) <=app.config["MAX_IMAGE_FILESIZE"]:
+        return True
+    return False    
+@app.route("/upload-image",methods=["GET","POST"])
+def upload_image():
+    if request.method == "POST":
+        if request.files:
+            if not allowed_filename_size(request.cookies.get("filesize")):
+                print("File exceeded maximum limit required")
+                return redirect(request.url)
+                
+
+            image = request.files["image"]
+            print(image)
+
+            if image.filename=="":
+                print("image must have a name")
+                return redirect(request.url)
+
+            if not check_image_extension(image.filename):
+                print("The image extension is not accepted try another")  
+                return redirect(request.url)  
+            else:
+                filename = secure_filename(image.filename)    
+
+                image.save(os.path.join(app.config["IMAGE_UPLOADS"],filename))
+                print("Image saved successfully")
+                return redirect(request.url)
+    return render_template("public/upload_image.html")  
+
+
+# sending files 
+"""
+string:
+int:
+float:
+path:
+uuid:
+
+"""
+from flask import send_from_directory,abort
+
+@app.route("/get-image/<image_name>")
+def get_image(image_name):
+  
+  try:
+      return send_from_directory(app.config["CLIENT_IMAGES"],image_name,as_attachment=True)
+  except FileNotFoundError:
+      abort(404)  
+
+@app.route("/get-csv/<filename>")
+def get_csv(filename):
+  
+  try:
+      return send_from_directory(app.config["CLIENT_CSV"],filename,as_attachment=False)
+  except FileNotFoundError:
+      abort(404)    
+
+# working with cookies
+from flask import request,make_response
+
+@app.route("/cookies")
+def cookies():
+    res = make_response("Cookies",200)
+
+    # Accessing cookies 
+    cookies =request.cookies
+    cookie3 = cookies.get("footbal")
+    print(cookie3)
+    # properties of cookies 
+    res.set_cookie("Cookie", value="Chocolate",
+    max_age=10,
+    expires=None,
+    path=request.path,
+    domain=None,
+    secure=False,
+    httponly=False,)
+
+    res.set_cookie("cart", "cart items")
+    res.set_cookie("footbal", "livescore")
+    return res 
+
+from flask import render_template,  request,session,redirect,url_for
+
+@app.route("/login",methods=["GET","POST"])
+def login():
+    
+    if request.method == "POST":
+        req = request.form
+        username = req.get("username")
+        # email = req.get("email")
+        password = req.get("password")
+        print(username,password)
+        if not username in users:
+            print("username not found")
+            return redirect(request.url)
+        else:
+            user = users[username]  
+
+        if not password == user["password"]:
+            print("Incorrect password") 
+            return redirect(request.url) 
+
+        else:
+            # Dont store sensitive information in cookies
+            session["USERNAME"] = user["username"] 
+            print("user added to session")  
+            # return redirect(request.url) 
+            return redirect(url_for("profile_page"))    
+    return render_template("public/auth/sign_in.html")
+
+@app.route("/profile_page") 
+def profile_page():
+    if session.get("USERNAME",None) is not  None:
+        username = session.get("USERNAME")
+        user = users[username]
+        return render_template("public/profile.html",user=user)  
+    else:
+        print("üsername not found")
+        return redirect(url_for('login'))
+
+@app.route("/sign-out")
+def sign_out():
+    session.pop("USERNAME")
+    return redirect("login")
